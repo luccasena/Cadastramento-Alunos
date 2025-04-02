@@ -39,6 +39,7 @@ typedef struct diciplines{
 typedef struct Information_of_Students{
     char                RGM[9];
     diciplines          *list_of_dicipline;
+    diciplines          *initial;
 
 
 }students;
@@ -71,8 +72,10 @@ int inserct_student(Info *Students){
     // Como iremos criar uma lista encadeada para adicionar na lista de disciplinas
     // Precisamo definir um aonde essa lista irá começar (initial) e aonde irá terminar (final_list).
 
-    diciplines *initial = NULL;
-    diciplines *final_list = NULL;
+    Students->College[Students->position].initial = NULL;
+
+    // Definimos um ponteiro para auxiliar no encadeamento das disciplinas
+    diciplines *aux_ptr;
 
     // Inserindo as diciplinas do usuário
     while(true){
@@ -90,13 +93,14 @@ int inserct_student(Info *Students){
 
         // Se a variável initial é igual a NULL
 
-        if(initial == NULL){
-            initial = new_node;
-            final_list = new_node;
+        if(Students->College->initial == NULL){
+            Students->College[Students->position].initial= new_node;
+            aux_ptr = new_node;
 
-        }else{
-            final_list->next_dicipline = new_node;
-            final_list = new_node;
+
+        }else {
+            aux_ptr->next_dicipline = new_node;
+            aux_ptr = new_node;
         }
 
         printf("Você deseja adicionar mais uma disciplina?: ");
@@ -106,15 +110,9 @@ int inserct_student(Info *Students){
             break;
         }
     }
-    Students->College[Students->position].list_of_dicipline = initial;
+    Students->College[Students->position].list_of_dicipline = Students->College->initial;
 
     printf("Aluno: %s\nPosição: %d\n\n", Students->College[Students->position].RGM, Students->position);
-
-    diciplines *current = Students->College[Students->position].list_of_dicipline;
-    while (current != NULL) {
-        printf("Disciplina: %s", current->name_of_dicipline);
-        current = current->next_dicipline;
-    }
 
     return 1;
 }
@@ -142,7 +140,7 @@ int main(){
                     printf("[1] - Realizar Cadastro;\n");
 
                     inserct_student(&Students);
-                    limpar_tela();
+                    // limpar_tela();
                     linhas();
                     printf("Usuário inserido com sucesso!\n");
 
