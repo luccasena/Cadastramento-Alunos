@@ -122,7 +122,7 @@ int inserct_student(Info *Students){
                 printf("Você deseja adicionar mais uma disciplina? [1 - Sim][0 - Não]: ");
                 if(scanf("%d", &answer) != 1){
                     limpar_tela();
-                    printf("\nOpção Inválida! Tente Novamente...\n");
+                    printf("Opção Inválida! Tente Novamente...\n");
                     linhas();
                     fflush(stdin);
                 }else{
@@ -204,6 +204,7 @@ void show_students(Info *Students){
         int size_of_list = Students->position + 1;
 
         for(int i = 0; i < size_of_list; i++){
+
             printf("%d. RGM: %s \n", i+1,Students->College[i].RGM);
             diciplines *current = Students->College[i].initial;
             while(current != NULL){
@@ -213,12 +214,10 @@ void show_students(Info *Students){
             if(i < size_of_list-1){
                 linhas();
             }
-
         }
         system("pause");
         limpar_tela();
     }
-
 }
 
 int main(){
