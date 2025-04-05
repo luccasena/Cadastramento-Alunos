@@ -1,4 +1,4 @@
-# Locadora de Veiculos
+# Cadastramento de Alunos
 
 Aplicação que envolve conceitos de listas sequencias e encadeadas, em contexto de um programa que armazena informações sobre estudantes. Um projeto realizado por um grupo de alunos cursando o 3º período da faculdade de Ciência da Computação na UNIPÊ:
 
