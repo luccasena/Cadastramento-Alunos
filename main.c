@@ -3,7 +3,7 @@
 #include <locale.h>
 #include <string.h>
 #include <stdbool.h>
-#define     TAM 60
+#define     TAM 1
 
 void linhas(){
     printf("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
@@ -37,7 +37,7 @@ typedef struct diciplines{
 }diciplines;
 
 typedef struct Information_of_Students{
-    char                RGM[9];
+    int                 RGM;
     diciplines          *initial;
 
 
@@ -66,7 +66,26 @@ int isEmpty(Info *Students){
 
 }
 
-int inserct_student(Info *Students){
+void insertSortRGM(Info *Students){
+
+    int i, j;
+    students atual;
+
+    for(i = 1; i <= Students->position; i++){
+        atual = Students->College[i];
+
+        j = i - 1;
+        while((j >= 0) && (atual.RGM < Students->College[j].RGM)){
+           Students->College[j + 1] = Students->College[j];
+           j--;
+
+        }
+        Students->College[j + 1] = atual;
+
+    }
+}
+
+void inserct_student(Info *Students){
 
     int answer;
 
@@ -75,12 +94,28 @@ int inserct_student(Info *Students){
     int pos = Students->position;
 
     // Inserindo o RGM:
-    printf("Digite o RGM do usuário: ");
-    scanf("%s", Students->College[pos].RGM);
-    fflush(stdin);
+    // Tratamento do RGM;
+    while(true){
+        int RGM;
+        printf("Digite o RGM do usuário: ");
 
+        if(scanf("%d", &RGM) != 1){
+            limpar_tela();
+            printf("RGM Inválido! O formato padrão é com números...\n");
+            linhas();
+        }else if(RGM > 99999999 || RGM < 0){
+            limpar_tela();
+            printf("RGM Inválido! O valor inserido excedeu o limite de 9 digitos...\n");
+            linhas();
+        }else{
+            Students->College[pos].RGM = RGM;
+            break;
+        }
+        fflush(stdin);
+    }
+    fflush(stdin);
     // Como iremos criar uma lista encadeada para adicionar na lista de disciplinas
-    // Precisamo definir um aonde essa lista irá começar (initial) e aonde irá terminar (final_list).
+    // Precisamo definir um aonde essa lista irá começar (initial.
 
     Students->College[pos].initial = NULL;
 
@@ -141,17 +176,17 @@ int inserct_student(Info *Students){
 
     limpar_tela();
     linhas();
+    insertSortRGM(&*Students);
     printf("Usuário inserido com sucesso!\n");
 
-    return 1;
 }
 
-int remove_student(Info *Students){
+void remove_student(Info *Students){
 
-    char RGM[9];
+    int RGM;
 
     printf("Digite o RGM do usuário que será removido: ");
-    scanf("%s", RGM);
+    scanf("%d", &RGM);
 
     int size_of_list = Students->position+1;
     int pos;
@@ -160,7 +195,7 @@ int remove_student(Info *Students){
     // Procura o RGM solicitado para remoção e guarda sua posição:
 
     for(int i = 0; i < size_of_list; i++){
-        if(strcmp(RGM, Students->College[i].RGM) == 0){
+        if(RGM == Students->College[i].RGM){
             pos = i;
             found = true;
             break;
@@ -173,15 +208,28 @@ int remove_student(Info *Students){
         printf("Usuário Não foi encontrado!\n");
 
     }else{
+
+        // Liberando os espaços de memória alocados para armazenar as disciplinas:
+
+        diciplines *current = Students->College[pos].initial;
+        while (current != NULL) {
+            diciplines *temp = current->next_dicipline;
+            free(current);
+            current = temp;
+        }
+        Students->College[pos].initial = NULL;
+
+        // Retirando da lista Sequencial o usuário solicitado:
+
         for(int i = pos; i < size_of_list; i++){
             Students->College[i] = Students->College[i + 1];
-        }
+            }
+
         limpar_tela();
         linhas();
         printf("Usuário removido com sucesso!\n");
         Students->position--;
     }
-    return 1;
 }
 
 void show_students(Info *Students){
@@ -192,7 +240,8 @@ void show_students(Info *Students){
 
     for(int i = 0; i < size_of_list; i++){
 
-        printf("%d. RGM: %s \n", i+1,Students->College[i].RGM);
+        printf("%d. RGM: %d \n", i+1,Students->College[i].RGM);
+
         diciplines *current = Students->College[i].initial;
         while(current != NULL){
             printf("  Disciplina: %s", current->name_of_dicipline);
@@ -208,31 +257,34 @@ void show_students(Info *Students){
 
 void search_students(Info *Students){
 
-    char RGM[9];
+    int RGM;
 
     printf("Digite o RGM do aluno que deseja encontrar: ");
-    scanf("%s", RGM);
+    scanf("%d", &RGM);
 
     int size_of_list = Students->position +1;
     bool found = false;
+    limpar_tela();
 
     for(int i = 0; i < size_of_list; i++){
-            if (strcmp(RGM, Students->College[i].RGM) == 0){
-                 found = true;
-                 printf("Aluno Encontrado:\n");
-                 printf("%d. RGM: %s\n", i+1, Students->College[i].RGM);
-                 diciplines *current = Students->College[i].initial;
-                 while(current != NULL){
-                        printf("  Disciplina: %s", current->name_of_dicipline);
-                        current = current->next_dicipline;
+        if (RGM == Students->College[i].RGM){
+            found = true;
+            printf("Aluno Encontrado:\n");
+            linhas();
+            printf("%d. RGM: %d\n", i+1, Students->College[i].RGM);
+
+            diciplines *current = Students->College[i].initial;
+            while(current != NULL){
+                    printf("  Disciplina: %s", current->name_of_dicipline);
+                    current = current->next_dicipline;
             }
-            system("pause");
-            limpar_tela();
+
             break;
         }
     }
      if(!found){
-            printf("Aluno com o RGM %s, não foi encontrado!\n",RGM);
+            limpar_tela();
+            printf("Aluno com o RGM %d, não foi encontrado!\n",RGM);
         }
 
 }
@@ -241,12 +293,13 @@ int main(){
     setlocale(LC_ALL,"");
 
     Info Students = create_list();
-    int choice;
+    int choice = -1;
 
     while(true){
 
         cabecalho();
         printf("Digite uma opção acima: ");
+
         if(scanf("%d", &choice) != 1){
             limpar_tela();
             linhas();
@@ -323,6 +376,7 @@ int main(){
         }
 
     }
+
     return 0;
 
 }
