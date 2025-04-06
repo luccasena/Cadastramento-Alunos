@@ -3,11 +3,16 @@
 #include <locale.h>
 #include <string.h>
 #include <stdbool.h>
-#define     TAM 1
+#define     TAM 60      // Tamanho da Lista Sequencial
+
+
+/// -------------------------    1. Funções Visuais   --------------------------- //
+
 
 void linhas(){
     printf("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
 }
+
 
 void cabecalho(){
 
@@ -25,67 +30,92 @@ void cabecalho(){
 
 }
 
+
 void limpar_tela(){
-    // Esta funcionalidade funciona corretamente no Windows
     system("cls");
 }
 
-typedef struct diciplines{
-    char name_of_dicipline[255];
-    struct diciplines *next_dicipline;
 
-}diciplines;
+/// -------------------------      2. Estruturas       -------------------------- //
+
+
+typedef struct disciplines{
+    char name_of_discipline[255];
+    struct disciplines *next_discipline;
+
+}disciplines;
+
 
 typedef struct Information_of_Students{
     int                 RGM;
-    diciplines          *initial;
+    disciplines          *initial;
 
-
-}students;
-
-typedef struct College{
-    students    College[TAM];
-    int         position;
 
 }Info;
 
-Info create_list(){
 
-    Info college;
-    college.position = -1;
+typedef struct College{
+    Info        College[TAM];
+    int         position;
 
-    return college;
+}students;
+
+
+/// -----------------  3. Funções para a Manipulação de dados  ----------------- //
+
+
+students create_list(){
+
+    students college;           // Inicializa a struct do tipo students chamada college;
+    college.position = -1;      // Position será inicializada = -1, indicando que a lista possui 0 elementos
+
+    return college;             // Retorna a lista inicializada;
 }
 
-int isFull(Info *Students){
-    return Students->position+1 == TAM;
+
+int isFull(students *Students){
+    return Students->position+1 == TAM;     // Confere se a lista está cheia;
 }
 
-int isEmpty(Info *Students){
-    return Students->position == -1;
+
+int isEmpty(students *Students){
+    return Students->position == -1;        // Confere se a lista está vazia;
 
 }
 
-void insertSortRGM(Info *Students){
+
+void inserctSortRGM(students *Students){
+
+    /*
+        Organiza a lista com o método Inserct Sort;
+        -   Seu funcionamento é baseado em comparar um elemento atual com o seu antecessor.
+        Se o elemento atual for menor que seu antecessor, então seu antecessor passa a ter sua posição
+        trocada com o atual, fazendo com que se torne o sucessor de atual.
+
+    */
+
+
+    // Inicializando variáveis que irão auxiliar na ordenação;
 
     int i, j;
-    students atual;
+    Info current;
 
     for(i = 1; i <= Students->position; i++){
-        atual = Students->College[i];
+        current = Students->College[i];
 
         j = i - 1;
-        while((j >= 0) && (atual.RGM < Students->College[j].RGM)){
+        while((j >= 0) && (current.RGM < Students->College[j].RGM)){
            Students->College[j + 1] = Students->College[j];
            j--;
 
         }
-        Students->College[j + 1] = atual;
+        Students->College[j + 1] = current;
 
     }
 }
 
-void inserct_student(Info *Students){
+
+void inserct_student(students *Students){
 
     int answer;
 
@@ -94,7 +124,7 @@ void inserct_student(Info *Students){
     int pos = Students->position;
 
     // Inserindo o RGM:
-    // Tratamento do RGM;
+
     while(true){
         int RGM;
         printf("Digite o RGM do usuário: ");
@@ -113,38 +143,29 @@ void inserct_student(Info *Students){
         }
         fflush(stdin);
     }
+
     fflush(stdin);
-    // Como iremos criar uma lista encadeada para adicionar na lista de disciplinas
-    // Precisamo definir um aonde essa lista irá começar (initial.
 
     Students->College[pos].initial = NULL;
 
     // Definimos um ponteiro para auxiliar no encadeamento das disciplinas
-    diciplines *aux_ptr;
+    disciplines *aux_ptr;
 
-    // Inserindo as diciplinas do usuário
+    // Inserindo as diciplinas do usuário:
     while(true){
+        disciplines *new_node = (disciplines *) malloc(sizeof(disciplines));
 
-        // Criando um novo local aonde será adicionado uma disciplina e alocando memória para suporta-lo.
-        diciplines *new_node = (diciplines *) malloc(sizeof(diciplines));
-
-        // Solicitando o nome da disciplina que o usuário deseja e armazenando na variável "new_node".
         printf("Digite o nome de uma disciplina: ");
-        fgets(new_node->name_of_dicipline, 255, stdin);
+        fgets(new_node->name_of_discipline, 255, stdin);
 
-        // Na teoria, se um elemento está sendo inserindo em uma lista encadeada então ele é o último,
-        // logo ele estará apontando para NULL que indica o fim da lista.
-
-        new_node->next_dicipline = NULL;
-
-        // Se a variável initial é igual a NULL, então o new_node é o primeiro nó da lista
+        new_node->next_discipline = NULL;
 
         if(Students->College[pos].initial == NULL){
             Students->College[pos].initial= new_node;
             aux_ptr = new_node;
 
         }else {
-            aux_ptr->next_dicipline = new_node;
+            aux_ptr->next_discipline = new_node;
             aux_ptr = new_node;
         }
 
@@ -176,12 +197,14 @@ void inserct_student(Info *Students){
 
     limpar_tela();
     linhas();
-    insertSortRGM(&*Students);
+    inserctSortRGM(&*Students);
     printf("Usuário inserido com sucesso!\n");
+
 
 }
 
-void remove_student(Info *Students){
+
+void remove_student(students *Students){
 
     int RGM;
 
@@ -211,9 +234,9 @@ void remove_student(Info *Students){
 
         // Liberando os espaços de memória alocados para armazenar as disciplinas:
 
-        diciplines *current = Students->College[pos].initial;
+        disciplines *current = Students->College[pos].initial;
         while (current != NULL) {
-            diciplines *temp = current->next_dicipline;
+            disciplines *temp = current->next_discipline;
             free(current);
             current = temp;
         }
@@ -232,7 +255,8 @@ void remove_student(Info *Students){
     }
 }
 
-void show_students(Info *Students){
+
+void show_students(students *Students){
 
     printf("Usuários Cadastrados em nosso Sistema:\n");
     linhas();
@@ -242,10 +266,10 @@ void show_students(Info *Students){
 
         printf("%d. RGM: %d \n", i+1,Students->College[i].RGM);
 
-        diciplines *current = Students->College[i].initial;
+        disciplines *current = Students->College[i].initial;
         while(current != NULL){
-            printf("  Disciplina: %s", current->name_of_dicipline);
-            current = current->next_dicipline;
+            printf("  Disciplina: %s", current->name_of_discipline);
+            current = current->next_discipline;
         }
         if(i < size_of_list-1){
             linhas();
@@ -255,7 +279,8 @@ void show_students(Info *Students){
     limpar_tela();
 }
 
-void search_students(Info *Students){
+
+void search_students(students *Students){
 
     int RGM;
 
@@ -273,10 +298,10 @@ void search_students(Info *Students){
             linhas();
             printf("%d. RGM: %d\n", i+1, Students->College[i].RGM);
 
-            diciplines *current = Students->College[i].initial;
+            disciplines *current = Students->College[i].initial;
             while(current != NULL){
-                    printf("  Disciplina: %s", current->name_of_dicipline);
-                    current = current->next_dicipline;
+                    printf("  Disciplina: %s", current->name_of_discipline);
+                    current = current->next_discipline;
             }
 
             break;
@@ -289,10 +314,13 @@ void search_students(Info *Students){
 
 }
 
+
+/// ------------------------  4. Código Principal  -----------------------------//
+
 int main(){
     setlocale(LC_ALL,"");
 
-    Info Students = create_list();
+    students Students = create_list();
     int choice = -1;
 
     while(true){
